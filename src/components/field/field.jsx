@@ -7,8 +7,8 @@ const Field = ({ cells, click }) => {
 	return (
 		<div className={styles.field}>
 			{
-				cells.map((cell, i) => (
-					<Cell key={i} value={cell} onClick={() => click(i)} />
+				cells.map((cell, id) => (
+					<Cell key={id} value={cell} onClick={() => click(id)} />
 				))
 				}
 		</div>
@@ -16,8 +16,8 @@ const Field = ({ cells, click }) => {
 }
 
 Field.propTypes = {
-	cells: PropTypes.string,
-	click: PropTypes.string
-}
+	cells: PropTypes.arrayOf(PropTypes.string),
+	click: PropTypes.func
+	}
 
 export default Field;
