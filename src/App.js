@@ -1,8 +1,6 @@
 import "./App.css";
-import Game from "./components/game/game.jsx";
+import { Game } from "./components/game/game.jsx";
 
-function App() {
+export const App = () => {
 	return <Game />;
-}
-
-export default App;
+};

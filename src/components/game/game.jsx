@@ -1,41 +1,54 @@
-import React, { useState } from 'react';
-import styles from './game.module.css'
-import Field from '../field/field';
+import { useState, useEffect } from 'react';
+import styles from './game.module.css';
+import { Field } from '../field/field';
 import { winLogic } from '../../winLogic';
+import { store } from '../../store';
 
-const Game = () => {
-	const [field, setField] = useState(Array(9).fill(null));
-	const [xIsNext, setXIsNext] = useState(true);
-	const [moveCount, setMoveCount] = useState(0);
-	const winner = winLogic(field);
+export const Game = () => {
+  const [field, setField] = useState(store.getState().field);
+  const [xIsNext, setXIsNext] = useState(store.getState().xIsNext);
+  const [moveCount, setMoveCount] = useState(store.getState().moveCount);
 
-	const clickOptions = (index) => {
-	const fieldCopy = [...field];
-	if (winner || fieldCopy[index]) return;
-	fieldCopy[index] = xIsNext ? 'X' : 'O';
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      setField(store.getState().field);
+      setXIsNext(store.getState().xIsNext);
+      setMoveCount(store.getState().moveCount);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
-	setField(fieldCopy);
-	setXIsNext(!xIsNext);
-	setMoveCount(prevCount => prevCount + 1);
-	};
+  const winner = winLogic(field);
 
-	const isDraw = () => {
-	return moveCount === field.length && !winner;
-	};
+  const clickOptions = (index) => {
+    if (winner || field[index]) return;
+    const fieldCopy = [...field];
+    fieldCopy[index] = xIsNext ? 'X' : 'O';
 
-	return (
-		<div className={styles.wrapper}>
-			<button className={styles.start__btn} onClick={() => setField(Array(9).fill(null))}>Начать заново</button>
-			<p className={styles.game__info}>
-				{winner
-					? 'Победил ' + winner
-					: isDraw()
-					? 'Ничья'
-					: 'Сейчас ходит ' + (xIsNext ? 'X' : 'O')}
-			</p>
-			<Field cells={field} click={clickOptions} />
-		</div>
-	);
-}
+    store.dispatch({ type: 'CLICK_CELL', payload: { index, currentPlayer: xIsNext } });
+  };
 
-export default Game;
+  const isDraw = () => {
+    return moveCount === field.length && !winner;
+  };
+
+  const resetGame = () => {
+    store.dispatch({ type: 'RESET_GAME' });
+  };
+
+  return (
+    <div className={styles.wrapper}>
+      <button className={styles.start__btn} onClick={() => resetGame()}>Начать заново</button>
+      <p className={styles.game__info}>
+        {winner
+          ? 'Победил ' + winner
+          : isDraw()
+          ? 'Ничья'
+          : 'Сейчас ходит ' + (xIsNext ? 'X' : 'O')}
+      </p>
+      <Field cells={field} click={clickOptions} />
+    </div>
+  );
+};
