@@ -21,6 +21,12 @@ export const gameReducer = (state = initialState, action) => {
 			};
 		case "RESET_GAME":
 			return initialState;
+		case "GAME_OVER":
+			return {
+				...state,
+				winner: action.payload.winner,
+				draw: action.payload.draw,
+			};
 		default:
 			return state;
 	}

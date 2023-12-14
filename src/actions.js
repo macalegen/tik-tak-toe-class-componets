@@ -4,3 +4,9 @@ export const clickCell = (index, currentPlayer) => {
 		payload: { index, currentPlayer },
 	};
 };
+
+export const resetGame = () => {
+	return {
+		type: "RESET_GAME",
+	};
+};

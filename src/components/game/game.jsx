@@ -1,49 +1,46 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './game.module.css';
 import { Field } from '../field/field';
 import { winLogic } from '../../winLogic';
-import { store } from '../../store';
+import { clickCell, resetGame } from '../../actions';
 
 export const Game = () => {
-  const [field, setField] = useState(store.getState().field);
-  const [xIsNext, setXIsNext] = useState(store.getState().xIsNext);
-  const [moveCount, setMoveCount] = useState(store.getState().moveCount);
+  const dispatch = useDispatch();
+  const { field, xIsNext, moveCount } = useSelector((state) => state);
+
+	const isDraw = useCallback(() => {
+    return moveCount === field.length && !winLogic(field);
+  }, [moveCount, field]);
 
   useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
-      setField(store.getState().field);
-      setXIsNext(store.getState().xIsNext);
-      setMoveCount(store.getState().moveCount);
-    });
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+		const winner = winLogic(field);
 
-  const winner = winLogic(field);
+		if (winner) {
+			dispatch({ type: 'GAME_OVER', payload: { winner } });
+		} else if (isDraw()) {
+			dispatch({ type: 'GAME_OVER', payload: { draw: true } });
+		}
+	}, [field, dispatch, isDraw]);
+
+
 
   const clickOptions = (index) => {
-    if (winner || field[index]) return;
-    const fieldCopy = [...field];
-    fieldCopy[index] = xIsNext ? 'X' : 'O';
+    if (winLogic(field) || field[index]) return;
 
-    store.dispatch({ type: 'CLICK_CELL', payload: { index, currentPlayer: xIsNext } });
+    dispatch(clickCell(index, xIsNext));
   };
 
-  const isDraw = () => {
-    return moveCount === field.length && !winner;
-  };
-
-  const resetGame = () => {
-    store.dispatch({ type: 'RESET_GAME' });
+  const resetGameHandler = () => {
+    dispatch(resetGame());
   };
 
   return (
     <div className={styles.wrapper}>
-      <button className={styles.start__btn} onClick={() => resetGame()}>Начать заново</button>
+      <button className={styles.start__btn} onClick={resetGameHandler}>Начать заново</button>
       <p className={styles.game__info}>
-        {winner
-          ? 'Победил ' + winner
+        {winLogic(field)
+          ? 'Победил ' + winLogic(field)
           : isDraw()
           ? 'Ничья'
           : 'Сейчас ходит ' + (xIsNext ? 'X' : 'O')}
