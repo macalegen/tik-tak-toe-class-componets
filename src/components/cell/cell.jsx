@@ -1,15 +1,17 @@
-import React from 'react';
-import styles from './cell.module.css'
 import PropTypes from 'prop-types'
+import { Component } from 'react'
 
-const Cell = (props) => {
+export class Cell extends Component {
+	render() {
 	return (
-		<button className={styles.cell} onClick={props.onClick}>{props.value}</button>
+		<button className='cell cell:hover' onClick={this.props.onClick}>
+			{this.props.value}
+		</button>
 	);
+}
 }
 
 Cell.propTypes = {
-	props: PropTypes.string
+	onClick: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
 }
-
-export default Cell;

@@ -1,4 +1,4 @@
-export function winLogic(cells) {
+export const winLogic = (cells) => {
 	const lines = [
 		[0, 1, 2],
 		[3, 4, 5],
@@ -16,4 +16,4 @@ export function winLogic(cells) {
 		}
 	}
 	return null;
-}
+};

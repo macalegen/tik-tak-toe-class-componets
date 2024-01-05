@@ -1,6 +1,6 @@
 import "./App.css";
-import { Game } from "./components/game/game.jsx";
+import { OldGame } from "./components/game/game.jsx";
 
 export const App = () => {
-	return <Game />;
+	return <OldGame />;
 };

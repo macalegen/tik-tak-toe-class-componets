@@ -1,51 +1,57 @@
-import React, { useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import styles from './game.module.css';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { Field } from '../field/field';
 import { winLogic } from '../../winLogic';
 import { clickCell, resetGame } from '../../actions';
+export class OldGameContainer extends Component {
+	  constructor({ field, xIsNext, moveCount }) {
+	    super(field, xIsNext, moveCount)
+			this.state = {
+        isDraw: moveCount === field.length && !winLogic(field)
+    }
+	  }
 
-export const Game = () => {
-  const dispatch = useDispatch();
-  const { field, xIsNext, moveCount } = useSelector((state) => state);
-
-	const isDraw = useCallback(() => {
-    return moveCount === field.length && !winLogic(field);
-  }, [moveCount, field]);
-
-  useEffect(() => {
-		const winner = winLogic(field);
-
-		if (winner) {
-			dispatch({ type: 'GAME_OVER', payload: { winner } });
-		} else if (isDraw()) {
-			dispatch({ type: 'GAME_OVER', payload: { draw: true } });
+		winner() {
+			winLogic(this.field)
 		}
-	}, [field, dispatch, isDraw]);
+
+	  render() {
+			return (
+				<div className='wrapper'>
+					<button className='start__btn start__btn:hover' onClick={this.props.resetGameHandler}>Начать заново</button>
+					<p className='game__info'>
+						{winLogic(this.props.field)
+							? 'Победил ' + winLogic(this.props.field)
+							: this.state.isDraw()
+							? 'Ничья'
+							: 'Сейчас ходит ' + (this.props.xIsNext ? 'X' : 'O')}
+					</p>
+					<Field cells={this.props.field} click={this.props.clickOptions} />
+				</div>
+			);
+	  }
+	}
+
+	const mapDispatchToProps = (dispatch) => ({
+		resetGameHandler: () =>	dispatch(resetGame()),
+		clickOptions: (index) => {
+			if (winLogic(this.props.field) || this.props.field[index]) return;
+
+			dispatch(clickCell(index, this.props.xIsNext))},
+		winner: (winner) => dispatch({ type: 'GAME_OVER', payload: { winner } }),
+		isDraw: () => dispatch({ type: 'GAME_OVER', payload: { draw: this.state.isDraw } }),
+	})
 
 
+	export const OldGame = connect(
+		null,
+		mapDispatchToProps
+	)(OldGameContainer);
 
-  const clickOptions = (index) => {
-    if (winLogic(field) || field[index]) return;
-
-    dispatch(clickCell(index, xIsNext));
-  };
-
-  const resetGameHandler = () => {
-    dispatch(resetGame());
-  };
-
-  return (
-    <div className={styles.wrapper}>
-      <button className={styles.start__btn} onClick={resetGameHandler}>Начать заново</button>
-      <p className={styles.game__info}>
-        {winLogic(field)
-          ? 'Победил ' + winLogic(field)
-          : isDraw()
-          ? 'Ничья'
-          : 'Сейчас ходит ' + (xIsNext ? 'X' : 'O')}
-      </p>
-      <Field cells={field} click={clickOptions} />
-    </div>
-  );
-};
+	OldGameContainer.propTypes = {
+		resetGame: PropTypes.func.isRequired,
+		clickOptions: PropTypes.func.isRequired,
+		winner: PropTypes.func.isRequired,
+		isDraw: PropTypes.func.isRequired,
+	}

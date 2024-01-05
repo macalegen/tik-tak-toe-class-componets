@@ -1,21 +1,22 @@
-import React from 'react';
-import styles from './field.module.css';
-import Cell from '../cell/cell';
+import { Component } from 'react';
+import { Cell } from '../cell/cell';
 import PropTypes from 'prop-types'
 
-export const Field = ({ cells, click }) => {
-	return (
-		<div className={styles.field}>
+export class Field extends Component {
+	render() {
+		return (<div className='field'>
 			{
-				cells.map((cell, id) => (
-					<Cell key={id} value={cell} onClick={() => click(id)} />
+				this.props.cells.map((cell, id) => (
+					<Cell key={id} value={cell} onClick={() => this.props.click(id)} />
 				))
 				}
 		</div>
-	);
+		)
+	};
 }
 
 Field.propTypes = {
+	onClick: PropTypes.func.isRequired,
 	cells: PropTypes.arrayOf(PropTypes.string),
-	click: PropTypes.func
+	click: PropTypes.func.isRequired,
 	}
